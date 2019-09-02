@@ -2,15 +2,21 @@ import React, {useState} from 'react';
 import { createStore, combineReducers } from 'redux';
 import { Provider } from 'react-redux';
 import ProductsReducer from './store/reducers/products';
+import CartReducer from './store/reducers/cart';
+import OrderReducer from './store/reducers/order';
 import ShopNavigator from './naigation/ShopNavigator';
 import { AppLoading } from 'expo';
 import * as Font from 'expo-font';
+import { composeWithDevTools } from 'redux-devtools-extension';
 
 const rootReducer = combineReducers({
-  products: ProductsReducer
+  products: ProductsReducer,
+  cart: CartReducer,
+  orders: OrderReducer
 });
 
-const store = createStore(rootReducer);
+const store = createStore(rootReducer, composeWithDevTools());
+// add the second argument for debugging the redux store on react native debugger
 
 const fetchFont = () => {
   return Font.loadAsync({
