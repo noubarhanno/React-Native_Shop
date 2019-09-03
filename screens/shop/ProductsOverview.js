@@ -11,19 +11,21 @@ import * as productActions from '../../store/actions/products';
 
 const ProductsOverview = props => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState();
     const products = useSelector(state => state.products.availableProducts);
     const dispatch = useDispatch();
 
     const loadProducts = useCallback(async () => {
       setError(null);
-      setIsLoading(true);
+      setIsRefreshing(true);
       try{
         await dispatch(productActions.fetchProducts());
       } catch (err){
         // we recieve error here because we throw the error from the action creator
         setError(err);
       }
+      setIsRefreshing(false);
       setIsLoading(false);
       console.log(error);
     }, [dispatch, setIsLoading, setError])
@@ -37,7 +39,10 @@ const ProductsOverview = props => {
     } ,[loadProducts]);
 
     useEffect(() => {
-      loadProducts();
+      setIsLoading(true)
+      loadProducts().then(() => {
+        setIsLoading(false)
+      })
     }, [dispatch, loadProducts]);
 
     const selectItemHandler = (id , title) => {
@@ -73,6 +78,8 @@ const ProductsOverview = props => {
 
     return (
       <FlatList
+        onRefresh={loadProducts}
+        refreshing={isRefreshing}
         data={products}
         keyExtractor={item => item.id}
         renderItem={itemData => (
