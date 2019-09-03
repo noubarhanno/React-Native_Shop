@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-import { createStore, combineReducers } from 'redux';
+import { createStore, combineReducers, applyMiddleware } from 'redux';
+import ReduxThunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 import ProductsReducer from './store/reducers/products';
 import CartReducer from './store/reducers/cart';
@@ -15,7 +16,7 @@ const rootReducer = combineReducers({
   orders: OrderReducer
 });
 
-const store = createStore(rootReducer, composeWithDevTools());
+const store = createStore(rootReducer, applyMiddleware(ReduxThunk));
 // add the second argument for debugging the redux store on react native debugger
 
 const fetchFont = () => {
