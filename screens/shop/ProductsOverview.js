@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FlatList, StyleSheet, Platform, Button,View, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FlatList,Text, StyleSheet, Platform, Button,View, ActivityIndicator } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import ProductItem from '../../components/shop/ProductItem';
 import * as cartActions from '../../store/actions/cart';
@@ -11,21 +11,48 @@ import * as productActions from '../../store/actions/products';
 
 const ProductsOverview = props => {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
     const products = useSelector(state => state.products.availableProducts);
     const dispatch = useDispatch();
 
-    useEffect(() => {
+    const loadProducts = useCallback(async () => {
+      setError(null);
       setIsLoading(true);
-      dispatch(productActions.fetchProducts()).then(() => {
-        setIsLoading(false);
-      });
-    }, [dispatch]);
+      try{
+        await dispatch(productActions.fetchProducts());
+      } catch (err){
+        // we recieve error here because we throw the error from the action creator
+        setError(err);
+      }
+      setIsLoading(false);
+      console.log(error);
+    }, [dispatch, setIsLoading, setError])
+
+    useEffect(() => {
+      const willFocusSub = props.navigation.addListener('willFocus', loadProducts);
+
+      return () => {
+        willFocusSub.remove();
+      };
+    } ,[loadProducts]);
+
+    useEffect(() => {
+      loadProducts();
+    }, [dispatch, loadProducts]);
 
     const selectItemHandler = (id , title) => {
       props.navigation.navigate("ProductDetail", {
         productId: id,
         productTitle: title
       });
+    }
+    if (error){
+      return (
+        <View style={styles.centered}>
+          <Text style={{fontFamily: 'open-sans', color:'red'}}>An error occured!</Text>
+          <Button title="Try again" onPress={loadProducts} color={Colors.primary}/>
+        </View>
+      );
     }
 
     if (isLoading){
@@ -35,6 +62,15 @@ const ProductsOverview = props => {
         </View>
       );
     }
+
+    if(!isLoading && products.length===0){
+      return (
+        <View style={styles.centered}>
+          <Text style={{fontFamily: 'open-sans-bold'}}>No products found , start add some</Text>
+        </View>
+      );
+    }
+
     return (
       <FlatList
         data={products}
