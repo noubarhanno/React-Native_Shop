@@ -3,9 +3,10 @@ export const SET_ORDERS = 'SET_ORDERS';
 import Order from '../../models/order';
 
 export const fetchOrders = () => {
-  return async dispatch => {
+  return async (dispatch, getState) => {
+    const userId = getState().auth.userId;
     try{
-      const response = await fetch('https://react-native-shop-guide.firebaseio.com/orders/u1.json');
+      const response = await fetch(`https://react-native-shop-guide.firebaseio.com/orders/${userId}.json`);
 
       if (!response.ok) {
           throw new Error('Something went wrong');
@@ -31,9 +32,11 @@ export const fetchOrders = () => {
 }
 
 export const addOrder = (cartItems, totalAmount) => {
-  return async dispatch => {
+  return async (dispatch, getState) => {
     const date = new Date();
-    const response = await fetch('https://react-native-shop-guide.firebaseio.com/orders/u1.json', {
+    const token = getState().auth.token;
+    const userId = getState().auth.userId
+    const response = await fetch(`https://react-native-shop-guide.firebaseio.com/orders/${userId}.json?auth=${token}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

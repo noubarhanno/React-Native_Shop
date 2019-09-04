@@ -1,17 +1,20 @@
 import React from 'react';
 import { createAppContainer, createSwitchNavigator } from 'react-navigation';
-import { Platform } from 'react-native';
+import { Platform, SafeAreaView, Button, View } from 'react-native';
 import { createStackNavigator } from 'react-navigation-stack';
-import { createDrawerNavigator } from 'react-navigation-drawer';
+import { createDrawerNavigator, DrawerNavigatorItems } from 'react-navigation-drawer';
 import ProductsOverview from '../screens/shop/ProductsOverview';
 import ProductDetail from '../screens/shop/ProductDetail';
 import UserProducts from '../screens/user/UserProducts';
 import EditProduct from '../screens/user/EditProduct';
 import AuthScreen from '../screens/user/AuthScreen';
+import StartupScreen from '../screens/StartupScreen';
 import Order from '../screens/shop/Orders';
 import Cart from '../screens/shop/Cart';
 import Colors from '../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
+import { useDispatch } from 'react-redux';
+import * as AuthActions from '../store/actions/auth';
 
 const defaultNavOptions = {
     headerStyle: {
@@ -63,6 +66,21 @@ const shopNavigator = createDrawerNavigator({
 }, {
     contentOptions: {
         activeTintColor: Colors.primary
+    },
+    contentComponent: props => {
+        const dispatch = useDispatch();
+        return (
+            <View style={{flex: 1, paddingTop: 20}}>
+                <SafeAreaView forceInset={{tope: 'always', horizontal: 'never'}}>
+                    <DrawerNavigatorItems {...props} />
+                    {/* above is the old navigation items we have */}
+                    <Button title="Logout" color={Colors.primary} onPress={() => {
+                        dispatch(AuthActions.logout());
+                        // props.navigation.navigate('Auth'); we remove this part as we now have a conatiner which checks the token and the userId and navigate upon the inavaibility
+                    }} />
+                </SafeAreaView>
+            </View>
+        );
     }
 })
 
@@ -73,6 +91,7 @@ const AuthNavigator = createStackNavigator({
 })
 
 const MainNavigator = createSwitchNavigator({
+    Startup: StartupScreen,
     Auth: AuthNavigator,
     Shop: shopNavigator
 });

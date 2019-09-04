@@ -55,6 +55,14 @@ const Order = props => {
       );
     }
 
+    if (orders.length === 0){
+      return (
+        <View style={styles.centered}>
+          <Text>No Orders Found , Shop Now!</Text>
+        </View>
+      );
+    }
+
     return (
       <FlatList
         data={orders}
